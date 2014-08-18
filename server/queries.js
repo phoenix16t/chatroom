@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var lastMessageId = 0;
 
 var connection = mysql.createConnection({
   user: 'root',
@@ -9,9 +10,15 @@ var connection = mysql.createConnection({
 connection.connect();
 
 exports.getMessages = function(callback) {
-  connection.query('select * from messages', function(err, results) {
+  connection.query('select * from messages where messageId > ' + lastMessageId +
+                   ' order by messageId desc', function(err, results) {
     if (err) { throw err; }
-    //console.log("query results:", results);         // logging
+    if (results && results.length > 0) {
+      console.log("query results:", results);         // logging
+      lastMessageId = results[0].messageId;
+      console.log("lastMessageId:", lastMessageId);         // logging
+    }
+    console.log("lastMessageId:", lastMessageId);         // logging
     callback(err, results);
   });
 };

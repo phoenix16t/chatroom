@@ -13,36 +13,47 @@ var headers = {
   'Content-Type': "application/json"
 };
 
-var sendResponse = function(response, status, text) {
-  //console.log("sendResponse:", text);           // logging
-  responseText = JSON.stringify(text);
-  response.writeHead(200, headers);
-  response.end(responseText);
+var parseData = function(request, callback) {
+//  console.log(request);
+  var data = "";
+
+  request.on("data", function(chunk) {
+    data += chunk;
+    console.log("chunk", chunk);
+  });
+  request.on("end", function() {
+//    callback(JSON.parse(data));
+  console.log("data", data);
+  });
 
 };
 
-var router = function(request, response) {
+var sendResponse = function(response, status, text) {
+  //console.log("sendResponse:", text);           // logging
+  responseText = JSON.stringify(text);
+  response.writeHead(status, headers);
+  response.end(responseText);
+};
 
+var router = function(request, response) {
   var path = url.parse(request.url).pathname;
   var method = request.method;
-  console.log(method, typeof(method));
   var status = 200;
-  var responseText = 'server works';
+  var responseText = messages = 'server works';
 
   console.log(method, "--", path);               // logging
 
   if (path === '/messages') {
-    if (method === 'GET') {
-      console.log("get works");                 // logging
-      getMessages(function(err, messages) {
-        console.log("getMessages");
-        sendResponse(response, status, messages);
-      });
-    } else if (method === 'OPTIONS'){
+    if (method === 'OPTIONS') {
       sendResponse(response, status, responseText);
+    } else if (method === 'GET') {
+//      parseData(request, function(messages) {
+        getMessages(function(err, messages) {
+          sendResponse(response, status, messages);
+        });
+//      });
     }
-  }
-  else {
+  } else {
     status = 404;
     responseText = "Bad page";
     sendResponse(response, status, responseText);
