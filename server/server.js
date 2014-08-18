@@ -12,18 +12,42 @@ var headers = {
   'Content-Type': "application/json"
 };
 
+var sendResponse = function(response, status, text) {
+  //console.log("sendResponse:", text);           // logging
+  responseText = JSON.stringify(text);
+  response.writeHead(200, headers);
+  response.end(responseText);
+
+};
+
+var getMessages = function(request, response) {
+
+};
+
 var router = function(request, response) {
 
   var path = url.parse(request.url).pathname;
   var method = request.method;
+  var status = 200;
+  var responseText = 'server works';
 
-  console.log(method, "--", path);                   // logging
+  console.log(method, "--", path);               // logging
 
-  response.writeHead(404, headers);
-  response.end('server works');
+  if (path === '/messages') {
+    if (method === 'GET') {
+      responseText = 'still alive';
+      getMessages(request, response);
+    }
+  }
+  else {
+    status = 404;
+    responseText = "Bad page";
+  }
+
+  sendResponse(response, status, responseText);
 }
 
 var server = http.createServer(router);
 server.listen(port, ip);
 
-console.log("Listening");
+console.log("Listening");                         // logging
