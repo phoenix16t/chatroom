@@ -1,5 +1,6 @@
 var http = require("http");
 var url = require('url');
+var getMessages = require('./queries').getMessages;
 
 var ip = "127.0.0.1";
 var port = 3001;
@@ -20,14 +21,11 @@ var sendResponse = function(response, status, text) {
 
 };
 
-var getMessages = function(request, response) {
-
-};
-
 var router = function(request, response) {
 
   var path = url.parse(request.url).pathname;
   var method = request.method;
+  console.log(method, typeof(method));
   var status = 200;
   var responseText = 'server works';
 
@@ -35,16 +33,20 @@ var router = function(request, response) {
 
   if (path === '/messages') {
     if (method === 'GET') {
-      responseText = 'still alive';
-      getMessages(request, response);
+      console.log("get works");                 // logging
+      getMessages(function(err, messages) {
+        console.log("getMessages");
+        sendResponse(response, status, messages);
+      });
+    } else if (method === 'OPTIONS'){
+      sendResponse(response, status, responseText);
     }
   }
   else {
     status = 404;
     responseText = "Bad page";
+    sendResponse(response, status, responseText);
   }
-
-  sendResponse(response, status, responseText);
 }
 
 var server = http.createServer(router);
